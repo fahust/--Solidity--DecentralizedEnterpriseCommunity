@@ -13,6 +13,8 @@ contract DEC is Ownable {
     bytes32 name;
     address founder;
     uint256 founds;
+    uint256 startAt;
+    uint256 endAt;
     mapping(address => Investissor) investissors;
   }
 
@@ -35,6 +37,10 @@ contract DEC is Ownable {
   }
 
   function investInEnterprise(uint256 enterpriseId) external payable {
+    require(
+      block.timestamp >= enterprises[enterpriseId].startAt &&
+        block.timestamp <= enterprises[enterpriseId].endAt
+    );
     enterprises[enterpriseId].investissors[_msgSender()].invest += msg.value;
   }
 
