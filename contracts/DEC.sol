@@ -29,12 +29,20 @@ contract DEC is Ownable {
     _;
   }
 
-  function createEnterprise(bytes32 name) external {
+  function createEnterprise(
+    bytes32 name,
+    uint256 startAt,
+    uint256 endAt
+  ) external {
     Enterprise storage enterprise = enterprises[countEnterprises];
     enterprise.name = name;
+    enterprise.startAt = startAt;
+    enterprise.endAt = endAt;
     enterprise.founder = _msgSender();
     countEnterprises++;
   }
+
+  function validateAtEnd(uint256 enterpriseId) external isFounder(enterpriseId) {}
 
   function investInEnterprise(uint256 enterpriseId) external payable {
     require(
