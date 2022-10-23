@@ -111,5 +111,19 @@ contract DEC is Ownable {
     ].investissors[_msgSender()].percent;
   }
 
+  function founderClaimFounds(uint256 enterpriseId) external isFounder(enterpriseId) {
+    uint256 percentValidated;
+    address[] memory investAddr = enterprises[enterpriseId].investissorsAddresses;
+    for (uint256 i = 0; i < investAddr.length; i++) {
+      percentValidated += enterprises[enterpriseId].validations[investAddr[i]].percent;
+    }
+    require(percentValidated >= 50, "not enough validation points");
+    enterprises[enterpriseId].founds -= enterprises[enterpriseId].request;
+    (bool success, ) = payable(_msgSender()).call{
+      value: enterprises[enterpriseId].request
+    }("");
+    require(success == true, "transaction not succeded");
+  }
+
   //founderSendFounds
 }
