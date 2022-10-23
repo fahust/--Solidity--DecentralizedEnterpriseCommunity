@@ -27,8 +27,14 @@ contract DEC is Ownable {
     _;
   }
 
-  function createEnterprise(Enterprise enterprise) external {
-    enterprises[countEnterprises] = enterprise;
+  function createEnterprise(bytes32 name) external {
+    Enterprise storage enterprise = enterprises[countEnterprises];
+    enterprise.name = name;
+    enterprise.founder = _msgSender();
     countEnterprises++;
+  }
+
+  function investInEnterprise(uint256 enterpriseId) external payable {
+    enterprises[enterpriseId].investissors[_msgSender()].invest += msg.value;
   }
 }
