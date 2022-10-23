@@ -20,8 +20,15 @@ contract DEC is Ownable {
     uint256 invest;
   }
 
+  uint256 countEnterprises;
+
   modifier isFounder(uint256 enterpriseId) {
     require(_msgSender() == enterprises[enterpriseId].founder, "you are not founder");
     _;
+  }
+
+  function createEnterprise(Enterprise enterprise) external {
+    enterprises[countEnterprises] = enterprise;
+    countEnterprises++;
   }
 }
