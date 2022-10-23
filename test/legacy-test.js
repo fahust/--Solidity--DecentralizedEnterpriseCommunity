@@ -1,6 +1,6 @@
 //const { BigNumber, ethers } = require("ethers");
 //const keccak256 = require("keccak256");
-const LEGACY = artifacts.require("LEGACY");
+const DEC = artifacts.require("DEC");
 const truffleAssert = require("truffle-assertions");
 const { ethers } = require("ethers");
 
@@ -37,20 +37,9 @@ const advanceBlock = () => {
 };
 
 contract("KANJIDROPERC721AWithReceive", async accounts => {
-  const leg = {
-    name: web3.utils.fromAscii("test de name un poil long").padEnd(66, "0"),
-    founder: accounts[0],
-    heir: accounts[1],
-    startAt: Math.round(Date.now() / 1000) - 103,
-    endAt: Math.round(Date.now() / 1000) + 1000,
-    lastClaim: 0,
-    weiBySeconds: 10,
-    founds: 1000,
-    //openFounds: 1000,
-  };
 
   before(async function () {
-    this.legacy = await LEGACY.new(); // we deploy contract
+    this.dec = await DEC.new(); // we deploy contract
   });
 
   describe("", async function () {});
