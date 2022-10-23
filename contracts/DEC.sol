@@ -17,11 +17,16 @@ contract DEC is Ownable {
     uint256 endAt;
     uint256 request;
     address[] investissorsAddresses;
+    mapping(address => Validation) validations;
     mapping(address => Investissor) investissors;
   }
 
   struct Investissor {
     uint256 invest;
+    uint256 percent;
+  }
+
+  struct Validation {
     uint256 percent;
   }
 
@@ -99,6 +104,12 @@ contract DEC is Ownable {
     enterprises[enterpriseId].request = request;
   }
 
+  function investissorsAcceptRequest(uint256 enterpriseId) external {
+    require(enterprises[enterpriseId].investissors[_msgSender()].percent > 0);
+    enterprises[enterpriseId].validations[_msgSender()].percent = enterprises[
+      enterpriseId
+    ].investissors[_msgSender()].percent;
+  }
+
   //founderSendFounds
-  //investissorsAcceptRequest
 }
