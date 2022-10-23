@@ -67,9 +67,25 @@ contract DEC is Ownable {
   }
 
   function refoundInvest(uint256 enterpriseId, uint256 value) external {
+    require(
+      block.timestamp >= enterprises[enterpriseId].startAt &&
+        block.timestamp <= enterprises[enterpriseId].endAt
+    );
     require(enterprises[enterpriseId].investissors[_msgSender()].invest >= value);
     enterprises[enterpriseId].founds -= value;
     enterprises[enterpriseId].investissors[_msgSender()].invest -= value;
+    (bool success, ) = payable(_msgSender()).call{ value: value }("");
+    require(success == true, "transaction not succeded");
+  }
+
+  function investissorTakePercent(uint256 enterpriseId, uint256 percent) external {
+    require(block.timestamp >= enterprises[enterpriseId].endAt);
+    require(enterprises[enterpriseId].investissors[_msgSender()].percent >= percent);
+    enterprises[enterpriseId].investissors[_msgSender()].percent -= percent;
+    uint256 value = enterprises[enterpriseId].founds /
+      enterprises[enterpriseId].investissors[_msgSender()].percent;
+    require(enterprises[enterpriseId].founds >= value);
+    enterprises[enterpriseId].founds -= value;
     (bool success, ) = payable(_msgSender()).call{ value: value }("");
     require(success == true, "transaction not succeded");
   }
