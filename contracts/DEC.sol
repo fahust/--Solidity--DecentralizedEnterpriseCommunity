@@ -47,6 +47,14 @@ contract DEC is Ownable {
     _;
   }
 
+  modifier inCrowdfunding(uint256 enterpriseId){
+    require(
+      block.timestamp >= enterprises[enterpriseId].startAt &&
+        block.timestamp <= enterprises[enterpriseId].endAt
+    );
+    _;
+  }
+
   function createEnterprise(
     bytes32 name,
     uint256 startAt,
@@ -62,6 +70,21 @@ contract DEC is Ownable {
     countEnterprises++;
   }
 
+  function investInEnterprise(uint256 enterpriseId) external payable inCrowdfunding(enterpriseId) {
+    if (enterprises[enterpriseId].investissors[_msgSender()].invest == 0)
+      enterprises[enterpriseId].investissorsAddresses.push(_msgSender());
+    enterprises[enterpriseId].founds += msg.value;
+    enterprises[enterpriseId].investissors[_msgSender()].invest += msg.value;
+  }
+
+  function refoundInvest(uint256 enterpriseId, uint256 value) external inCrowdfunding(enterpriseId) {
+    require(enterprises[enterpriseId].investissors[_msgSender()].invest >= value);
+    enterprises[enterpriseId].founds -= value;
+    enterprises[enterpriseId].investissors[_msgSender()].invest -= value;
+    (bool success, ) = payable(_msgSender()).call{ value: value }("");
+    require(success == true, "transaction not succeded");
+  }
+
   function validateAtEnd(uint256 enterpriseId) external isFounder(enterpriseId) {
     require(block.timestamp >= enterprises[enterpriseId].endAt);
     require(enterprises[enterpriseId].validated == false);
@@ -72,29 +95,6 @@ contract DEC is Ownable {
         (enterprises[enterpriseId].founds * MAXBPS);
     }
     enterprises[enterpriseId].validated = true;
-  }
-
-  function investInEnterprise(uint256 enterpriseId) external payable {
-    require(
-      block.timestamp >= enterprises[enterpriseId].startAt &&
-        block.timestamp <= enterprises[enterpriseId].endAt
-    );
-    if (enterprises[enterpriseId].investissors[_msgSender()].invest == 0)
-      enterprises[enterpriseId].investissorsAddresses.push(_msgSender());
-    enterprises[enterpriseId].founds += msg.value;
-    enterprises[enterpriseId].investissors[_msgSender()].invest += msg.value;
-  }
-
-  function refoundInvest(uint256 enterpriseId, uint256 value) external {
-    require(
-      block.timestamp >= enterprises[enterpriseId].startAt &&
-        block.timestamp <= enterprises[enterpriseId].endAt
-    );
-    require(enterprises[enterpriseId].investissors[_msgSender()].invest >= value);
-    enterprises[enterpriseId].founds -= value;
-    enterprises[enterpriseId].investissors[_msgSender()].invest -= value;
-    (bool success, ) = payable(_msgSender()).call{ value: value }("");
-    require(success == true, "transaction not succeded");
   }
 
   function investissorTakePercent(uint256 enterpriseId, uint256 percent)
