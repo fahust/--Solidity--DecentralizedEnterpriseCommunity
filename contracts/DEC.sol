@@ -17,6 +17,7 @@ contract DEC is Ownable {
     uint256 endAt;
     uint256 request;
     uint256 minVote;
+    bool validated;
     address[] investissorsAddresses;
     mapping(address => Validation) validations;
     mapping(address => Investissor) investissors;
@@ -41,6 +42,11 @@ contract DEC is Ownable {
     _;
   }
 
+  modifier isValidated(uint256 enterpriseId) {
+    require(_msgSender() == enterprises[enterpriseId].founder, "you are not founder");
+    _;
+  }
+
   function createEnterprise(
     bytes32 name,
     uint256 startAt,
@@ -58,12 +64,14 @@ contract DEC is Ownable {
 
   function validateAtEnd(uint256 enterpriseId) external isFounder(enterpriseId) {
     require(block.timestamp >= enterprises[enterpriseId].endAt);
+    require(enterprises[enterpriseId].validated == false);
     address[] memory investAddr = enterprises[enterpriseId].investissorsAddresses;
     for (uint256 i = 0; i < investAddr.length; i++) {
       enterprises[enterpriseId].investissors[investAddr[i]].percent =
         (enterprises[enterpriseId].investissors[investAddr[i]].invest * MAXBPS) /
         (enterprises[enterpriseId].founds * MAXBPS);
     }
+    enterprises[enterpriseId].validated = true;
   }
 
   function investInEnterprise(uint256 enterpriseId) external payable {
@@ -89,7 +97,10 @@ contract DEC is Ownable {
     require(success == true, "transaction not succeded");
   }
 
-  function investissorTakePercent(uint256 enterpriseId, uint256 percent) external {
+  function investissorTakePercent(uint256 enterpriseId, uint256 percent)
+    external
+    isValidated(enterpriseId)
+  {
     require(block.timestamp >= enterprises[enterpriseId].endAt);
     require(enterprises[enterpriseId].investissors[_msgSender()].percent >= percent);
     enterprises[enterpriseId].investissors[_msgSender()].percent -= percent;
@@ -104,19 +115,27 @@ contract DEC is Ownable {
   function founderRequestFounds(uint256 enterpriseId, uint256 request)
     external
     isFounder(enterpriseId)
+    isValidated(enterpriseId)
   {
     require(enterprises[enterpriseId].founds >= enterprises[enterpriseId].request);
     enterprises[enterpriseId].request = request;
   }
 
-  function investissorsAcceptRequest(uint256 enterpriseId) external {
+  function investissorsAcceptRequest(uint256 enterpriseId)
+    external
+    isValidated(enterpriseId)
+  {
     require(enterprises[enterpriseId].investissors[_msgSender()].percent > 0);
     enterprises[enterpriseId].validations[_msgSender()].percent = enterprises[
       enterpriseId
     ].investissors[_msgSender()].percent;
   }
 
-  function founderClaimFounds(uint256 enterpriseId) external isFounder(enterpriseId) {
+  function founderClaimFounds(uint256 enterpriseId)
+    external
+    isFounder(enterpriseId)
+    isValidated(enterpriseId)
+  {
     uint256 percentValidated;
     address[] memory investAddr = enterprises[enterpriseId].investissorsAddresses;
     for (uint256 i = 0; i < investAddr.length; i++) {
@@ -137,6 +156,7 @@ contract DEC is Ownable {
     external
     payable
     isFounder(enterpriseId)
+    isValidated(enterpriseId)
   {
     enterprises[enterpriseId].founds += msg.value;
     emit sendFunds(enterpriseId, msg.value, _msgSender());
