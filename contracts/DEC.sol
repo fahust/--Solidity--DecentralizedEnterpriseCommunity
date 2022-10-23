@@ -34,6 +34,8 @@ contract DEC is Ownable {
   uint256 countEnterprises;
   uint256 constant MAXBPS = 1000000;
 
+  event sendFunds(uint256 indexed enterpriseId, uint256 value, address sender);
+
   modifier isFounder(uint256 enterpriseId) {
     require(_msgSender() == enterprises[enterpriseId].founder, "you are not founder");
     _;
@@ -129,6 +131,15 @@ contract DEC is Ownable {
       value: enterprises[enterpriseId].request
     }("");
     require(success == true, "transaction not succeded");
+  }
+
+  function founderSendFounds(uint256 enterpriseId)
+    external
+    payable
+    isFounder(enterpriseId)
+  {
+    enterprises[enterpriseId].founds += msg.value;
+    emit sendFunds(enterpriseId, msg.value, _msgSender());
   }
 
   //founderSendFounds
