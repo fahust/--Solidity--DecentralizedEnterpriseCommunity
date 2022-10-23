@@ -37,4 +37,10 @@ contract DEC is Ownable {
   function investInEnterprise(uint256 enterpriseId) external payable {
     enterprises[enterpriseId].investissors[_msgSender()].invest += msg.value;
   }
+
+  function refoundInvest(uint256 enterpriseId, uint256 value) external {
+    require(enterprises[enterpriseId].investissors[_msgSender()].invest >= value);
+    (bool success, ) = payable(_msgSender()).call{ value: value }("");
+    require(success == true, "transaction not succeded");
+  }
 }
