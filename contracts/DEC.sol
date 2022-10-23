@@ -11,12 +11,17 @@ contract DEC is Ownable {
 
   struct Enterprise {
     bytes32 name;
-    address owner;
+    address founder;
     uint256 founds;
     mapping(address => Investissor) investissors;
   }
 
   struct Investissor {
     uint256 invest;
+  }
+
+  modifier isFounder(uint256 enterpriseId) {
+    require(_msgSender() == enterprises[enterpriseId].founder, "you are not founder");
+    _;
   }
 }
