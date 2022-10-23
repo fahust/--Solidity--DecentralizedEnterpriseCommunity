@@ -15,6 +15,7 @@ contract DEC is Ownable {
     uint256 founds;
     uint256 startAt;
     uint256 endAt;
+    uint256 request;
     address[] investissorsAddresses;
     mapping(address => Investissor) investissors;
   }
@@ -89,4 +90,15 @@ contract DEC is Ownable {
     (bool success, ) = payable(_msgSender()).call{ value: value }("");
     require(success == true, "transaction not succeded");
   }
+
+  function founderRequestFounds(uint256 enterpriseId, uint256 request)
+    external
+    isFounder(enterpriseId)
+  {
+    require(enterprises[enterpriseId].founds >= enterprises[enterpriseId].request);
+    enterprises[enterpriseId].request = request;
+  }
+
+  //founderSendFounds
+  //investissorsAcceptRequest
 }
