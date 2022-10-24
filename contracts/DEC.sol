@@ -16,6 +16,7 @@ contract DEC is Ownable {
     uint256 startAt;
     uint256 endAt;
     uint256 request;
+    uint256 minVote;
     address[] investissorsAddresses;
     mapping(address => Validation) validations;
     mapping(address => Investissor) investissors;
@@ -31,6 +32,7 @@ contract DEC is Ownable {
   }
 
   uint256 countEnterprises;
+  uint256 constant MAXBPS = 1000000;
 
   modifier isFounder(uint256 enterpriseId) {
     require(_msgSender() == enterprises[enterpriseId].founder, "you are not founder");
@@ -40,12 +42,14 @@ contract DEC is Ownable {
   function createEnterprise(
     bytes32 name,
     uint256 startAt,
-    uint256 endAt
+    uint256 endAt,
+    uint256 minVote
   ) external {
     Enterprise storage enterprise = enterprises[countEnterprises];
     enterprise.name = name;
     enterprise.startAt = startAt;
     enterprise.endAt = endAt;
+    enterprise.minVote = minVote;
     enterprise.founder = _msgSender();
     countEnterprises++;
   }
@@ -55,9 +59,8 @@ contract DEC is Ownable {
     address[] memory investAddr = enterprises[enterpriseId].investissorsAddresses;
     for (uint256 i = 0; i < investAddr.length; i++) {
       enterprises[enterpriseId].investissors[investAddr[i]].percent =
-        (enterprises[enterpriseId].investissors[investAddr[i]].invest /
-          enterprises[enterpriseId].founds) *
-        100;
+        (enterprises[enterpriseId].investissors[investAddr[i]].invest * MAXBPS) /
+        (enterprises[enterpriseId].founds * MAXBPS);
     }
   }
 
@@ -117,7 +120,10 @@ contract DEC is Ownable {
     for (uint256 i = 0; i < investAddr.length; i++) {
       percentValidated += enterprises[enterpriseId].validations[investAddr[i]].percent;
     }
-    require(percentValidated >= 50, "not enough validation points");
+    require(
+      percentValidated >= enterprises[enterpriseId].minVote,
+      "not enough validation points"
+    );
     enterprises[enterpriseId].founds -= enterprises[enterpriseId].request;
     (bool success, ) = payable(_msgSender()).call{
       value: enterprises[enterpriseId].request
