@@ -37,10 +37,21 @@ const advanceBlock = () => {
 };
 
 contract("KANJIDROPERC721AWithReceive", async accounts => {
+  const enterprise = {
+    name: web3.utils.fromAscii("test de name un poil long").padEnd(66, "0"),
+    startAt: Math.round(Date.now() / 1000) - 103,
+    endAt: Math.round(Date.now() / 1000) + 5,
+    minVote:500000
+  };
 
   before(async function () {
     this.dec = await DEC.new(); // we deploy contract
   });
 
-  describe("", async function () {});
+  describe("", async function () {
+    it("SUCCESS : set enterprise", async function () {
+      await this.warlock.createEnterprise(...enterprise);
+    });
+
+  });
 });
