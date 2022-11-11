@@ -38,10 +38,10 @@ const advanceBlock = () => {
 
 contract("KANJIDROPERC721AWithReceive", async accounts => {
   const enterprise = {
-    name: web3.utils.fromAscii("test de name un poil long").padEnd(66, "0"),
-    startAt: Math.round(Date.now() / 1000) - 103,
-    endAt: Math.round(Date.now() / 1000) + 5,
-    minVote:500000
+    name: web3.utils.fromAscii("test de name").padEnd(66, "0"),
+    startAt: Math.floor(Date.now() / 1000) - 103,
+    endAt: Math.floor(Date.now() / 1000) + 5,
+    minVote: 500000,
   };
 
   before(async function () {
@@ -50,8 +50,9 @@ contract("KANJIDROPERC721AWithReceive", async accounts => {
 
   describe("", async function () {
     it("SUCCESS : set enterprise", async function () {
-      await this.warlock.createEnterprise(...enterprise);
+      await this.dec.createEnterprise(...Object.values(enterprise), {
+        from: accounts[0],
+      });
     });
-
   });
 });
