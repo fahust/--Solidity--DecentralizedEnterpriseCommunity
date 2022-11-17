@@ -1,5 +1,5 @@
 # DECENTRALIZED ENTERPRISE COMMUNITY
-![DEC](./doc/Decentralized%20enterprise.png?raw=true 'DEC')
+<div style="text-align:center"><img src="./doc/Decentralized%20enterprise.png?raw=true" /></div>
 
 ## Utils
 - **truffle** 5.6.3
